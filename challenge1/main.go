@@ -59,7 +59,7 @@ type repoMetadata struct {
 
 func retrieveRepoMetadata(repo string) {
 	//https://api.github.com/users/donvito/repos
-	apiRoot := "https://api.github.com/repos/" + repo
+	apiRoot := fmt.Sprintf("%s%s", "https://api.github.com/repos/", repo)
 	response, err := http.Get(apiRoot)
 
 	if err != nil {
@@ -67,31 +67,55 @@ func retrieveRepoMetadata(repo string) {
 	}
 	defer response.Body.Close()
 
-	b, err := ioutil.ReadAll(response.Body)
+	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		panic(err)
 	}
 
 	var _repoMetadata repoMetadata
-	err = json.Unmarshal(b, &_repoMetadata)
+	err = json.Unmarshal(body, &_repoMetadata)
 
-	//bodyString := string(bodyInBytes)
-
-	//fmt.Printf("Repo name = %s , Clone URL = %s, Commits URL = %s \n", _repoMetadata.Name, _repoMetadata.CloneURL, _repoMetadata.CommitsURL)
-
+	_repoMetadata.CommitsURL = fmt.Sprintf("%s%s%s", "https://api.github.com/repos/donvito/", _repoMetadata.Name, "/commits") // TODO: need to take this from commit URL in API response
 	latstCommitDate, author := retrieveRepoCommits(_repoMetadata.CommitsURL)
 	fmt.Printf("%s, %s, %s, %s \n", _repoMetadata.Name, _repoMetadata.CloneURL, latstCommitDate, author)
 }
 
-type repoCommits struct {
-	Name     string `json:"name"`
-	CloneURL string `json:"clone_url"`
+type RepoCommits struct {
+	Sha    string `json:"sha"`
+	Commit Commit `json:"commit"`
+}
+
+type Commit struct {
+	Author Author `json:"author"`
+}
+
+type Author struct {
+	Name string `json:"name"`
+	Date string `json:"date"`
 }
 
 func retrieveRepoCommits(commitsURL string) (latestCommitDate, author string) {
-	//https://api.github.com/repos/donvito/codechallenge/commits
-	latestCommitDate = "06/05/2018" //TODO: implement this
-	author = "Melvin Vivas"         //TODO: implement this
+
+	//println(commitsURL)
+
+	response, err := http.Get(commitsURL)
+	if err != nil {
+		panic(err)
+	}
+	defer response.Body.Close()
+
+	body, err := ioutil.ReadAll(response.Body)
+
+	// Unmarshal string into structs.
+	var repos []RepoCommits
+	json.Unmarshal(body, &repos)
+
+	// Loop over structs and display them.
+	for l := range repos {
+		latestCommitDate = repos[l].Commit.Author.Date
+		author = repos[l].Commit.Author.Name
+		break // just get latest so break after first iteration, need to improve this
+	}
 
 	return
 
