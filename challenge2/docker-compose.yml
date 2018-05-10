@@ -1,0 +1,58 @@
+version: "3.3"
+services:
+
+  elasticsearch:
+    image: 'docker.elastic.co/elasticsearch/elasticsearch:5.6.1'
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - elasticsearchvol:/usr/share/elasticsearch/data 
+    networks:
+      - net1
+    environment:
+      - xpack.security.enabled=false 
+
+  fluentd:
+    image: custom-fluentd:latest
+    ports:
+      - "24224:24224"
+    networks:
+      - net1
+    depends_on:  
+      - "elasticsearch"
+    volumes:
+      - ./fluentd/etc:/fluentd/etc      
+
+  kibana:
+    image: 'melvindave/kibana:5.6.1'
+    ports:
+      - "5601:5601"
+    networks:
+      - net1
+    depends_on:
+      - elasticsearch    
+  
+  nginx:
+    image: nginx
+    ports:
+      - "80:80"
+    networks:
+      - net1      
+    deploy:
+      replicas: 1  
+    volumes:
+      - /Users/melvin/Documents/go/projects/src/github.com/donvito/codechallenge/challenge2/nginx-files:/usr/share/nginx/html
+    logging:
+      driver: fluentd  
+      options:
+        fluentd-address: localhost:24224
+        tag: httpd.access
+    depends_on:  
+      - "fluentd" 
+
+networks:
+  net1:
+
+volumes:
+  elasticsearchvol:  
