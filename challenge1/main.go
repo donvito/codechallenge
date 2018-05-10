@@ -20,17 +20,13 @@ func main() {
 	repos := []string{}
 	if os.Args[1] == "--filename" || os.Args[1] == "-f" {
 		reposFilename := os.Args[2]
-
-		//fmt.Print(reposFilename, "\n")
 		repos = readReposFromFile(reposFilename)
-		//fmt.Println(repos)
 	} else {
 		fmt.Println(errMsg)
 		os.Exit(1)
 	}
 
 	for _, repo := range repos {
-		//fmt.Printf("repo = %s \n", repo)
 		retrieveRepoMetadata(repo)
 	}
 
@@ -80,23 +76,21 @@ func retrieveRepoMetadata(repo string) {
 	fmt.Printf("%s, %s, %s, %s \n", _repoMetadata.Name, _repoMetadata.CloneURL, latstCommitDate, author)
 }
 
-type RepoCommits struct {
+type repoCommits struct {
 	Sha    string `json:"sha"`
-	Commit Commit `json:"commit"`
+	Commit commit `json:"commit"`
 }
 
-type Commit struct {
-	Author Author `json:"author"`
+type commit struct {
+	Author author `json:"author"`
 }
 
-type Author struct {
+type author struct {
 	Name string `json:"name"`
 	Date string `json:"date"`
 }
 
 func retrieveRepoCommits(commitsURL string) (latestCommitDate, author string) {
-
-	//println(commitsURL)
 
 	response, err := http.Get(commitsURL)
 	if err != nil {
@@ -107,14 +101,13 @@ func retrieveRepoCommits(commitsURL string) (latestCommitDate, author string) {
 	body, err := ioutil.ReadAll(response.Body)
 
 	// Unmarshal string into structs.
-	var repos []RepoCommits
+	var repos []repoCommits
 	json.Unmarshal(body, &repos)
 
-	// Loop over structs and display them.
-	for l := range repos {
-		latestCommitDate = repos[l].Commit.Author.Date
-		author = repos[l].Commit.Author.Name
-		break // just get latest so break after first iteration, need to improve this
+	//get first element of slice only
+	if len(repos) > 0 {
+		latestCommitDate = repos[0].Commit.Author.Date
+		author = repos[0].Commit.Author.Name
 	}
 
 	return
