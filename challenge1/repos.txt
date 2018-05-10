@@ -1,3 +1,2 @@
 donvito/learngo
-donvito/dockerstack
-donvito/vagrantfiles
+geocine/golem

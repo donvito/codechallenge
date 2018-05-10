@@ -1,3 +1,5 @@
+[![Go Report Card](https://goreportcard.com/badge/github.com/donvito/codechallenge)](https://goreportcard.com/report/github.com/donvito/codechallenge)
+
 # Build Docker image
 
 ```docker build --tag 'challenge1:1.0' .```
