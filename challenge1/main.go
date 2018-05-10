@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -71,9 +72,19 @@ func retrieveRepoMetadata(repo string) {
 	var _repoMetadata repoMetadata
 	err = json.Unmarshal(body, &_repoMetadata)
 
-	_repoMetadata.CommitsURL = fmt.Sprintf("%s%s%s", "https://api.github.com/repos/donvito/", _repoMetadata.Name, "/commits") // TODO: need to take this from commit URL in API response
-	latstCommitDate, author := retrieveRepoCommits(_repoMetadata.CommitsURL)
+	parsedCommitsURL := parseCommitsURL(_repoMetadata.CommitsURL)
+
+	latstCommitDate, author := retrieveRepoCommits(parsedCommitsURL)
 	fmt.Printf("%s, %s, %s, %s \n", _repoMetadata.Name, _repoMetadata.CloneURL, latstCommitDate, author)
+}
+
+func parseCommitsURL(commitsURL string) (parsedCommitsURL string) {
+
+	i := strings.Index(commitsURL, "{/sha}")
+	parsedCommitsURL = commitsURL[:i]
+
+	return
+
 }
 
 type repoCommits struct {
