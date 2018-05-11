@@ -14,7 +14,7 @@ services:
       - xpack.security.enabled=false 
 
   fluentd:
-    image: custom-fluentd:latest
+    image: melvindave/fluentd-elastic:1.0
     ports:
       - "24224:24224"
     networks:
