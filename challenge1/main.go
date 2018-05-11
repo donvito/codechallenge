@@ -29,11 +29,11 @@ func main() {
 
 	var repoInfos = make([]map[string]string, 0)
 
-	m := make(map[string]string)
-	m["RepoName"] = "RepoName"
-	m["CloneURL"] = "CloneURL"
-	m["LastCommitDate"] = "LastCommitDate"
-	m["Author"] = "Author"
+	m := map[string]string{"RepoName": "Repo Name", "CloneURL": "Clone URL", "LastCommitDate": "Last Commit Date", "Author": "Author"}
+	// m["RepoName"] = "RepoName"
+	// m["CloneURL"] = "CloneURL"
+	// m["LastCommitDate"] = "LastCommitDate"
+	// m["Author"] = "Author"
 	repoInfos = append(repoInfos, m)
 
 	for _, repo := range repos {
