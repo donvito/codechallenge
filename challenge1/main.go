@@ -27,8 +27,22 @@ func main() {
 		os.Exit(1)
 	}
 
+	var repoInfos = make([]map[string]string, 0)
+
+	m := make(map[string]string)
+	m["RepoName"] = "RepoName"
+	m["CloneURL"] = "CloneURL"
+	m["LastCommitDate"] = "LastCommitDate"
+	m["Author"] = "Author"
+	repoInfos = append(repoInfos, m)
+
 	for _, repo := range repos {
-		retrieveRepoMetadata(repo)
+		m := retrieveRepoMetadata(repo)
+		repoInfos = append(repoInfos, m)
+	}
+
+	for _, m := range repoInfos {
+		fmt.Printf("%s, %s, %s, %s \n", m["RepoName"], m["CloneURL"], m["LastCommitDate"], m["Author"])
 	}
 
 }
@@ -54,7 +68,7 @@ type repoMetadata struct {
 	CommitsURL string `json:"commits_url"`
 }
 
-func retrieveRepoMetadata(repo string) {
+func retrieveRepoMetadata(repo string) (m map[string]string) {
 	//https://api.github.com/users/donvito/repos
 	apiRoot := fmt.Sprintf("%s%s", "https://api.github.com/repos/", repo)
 	response, err := http.Get(apiRoot)
@@ -73,9 +87,12 @@ func retrieveRepoMetadata(repo string) {
 	err = json.Unmarshal(body, &_repoMetadata)
 
 	parsedCommitsURL := parseCommitsURL(_repoMetadata.CommitsURL)
+	lastCommitDate, author := retrieveRepoCommits(parsedCommitsURL)
 
-	latstCommitDate, author := retrieveRepoCommits(parsedCommitsURL)
-	fmt.Printf("%s, %s, %s, %s \n", _repoMetadata.Name, _repoMetadata.CloneURL, latstCommitDate, author)
+	m = map[string]string{"RepoName": _repoMetadata.Name, "CloneURL": _repoMetadata.CloneURL, "LastCommitDate": lastCommitDate, "Author": author}
+
+	return
+
 }
 
 func parseCommitsURL(commitsURL string) (parsedCommitsURL string) {
