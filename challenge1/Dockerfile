@@ -1,6 +1,7 @@
 FROM golang:1.9.2 as builder
 ARG SOURCE_LOCATION=/tmp
 WORKDIR ${SOURCE_LOCATION}
+RUN go get -d -v github.com/donvito/gopkg/githubstats
 COPY main.go .
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .
 
